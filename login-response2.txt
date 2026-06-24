@@ -1,0 +1,52 @@
+HTTP/1.1 302 
+Set-Cookie: JSESSIONID=C0A0CEE56B1449A3E688ABE77B03D4F6; Path=/; HttpOnly
+X-Content-Type-Options: nosniff
+X-XSS-Protection: 0
+Cache-Control: no-cache, no-store, max-age=0, must-revalidate
+Pragma: no-cache
+Expires: 0
+X-Frame-Options: DENY
+Location: http://localhost:9090/login?error
+Content-Length: 0
+Date: Mon, 25 May 2026 12:09:48 GMT
+
+HTTP/1.1 200 
+X-Content-Type-Options: nosniff
+X-XSS-Protection: 0
+Cache-Control: no-cache, no-store, max-age=0, must-revalidate
+Pragma: no-cache
+Expires: 0
+X-Frame-Options: DENY
+Content-Type: text/html;charset=UTF-8
+Content-Language: en-US
+Transfer-Encoding: chunked
+Date: Mon, 25 May 2026 12:09:48 GMT
+
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8" />
+    <title>Login</title>
+</head>
+<body>
+<h1>Login</h1>
+<div>
+    <p style="color: red;">Invalid check number or password.</p>
+</div>
+
+<form action="/login" method="post">
+    <div>
+        <label for="checkNumber">Check Number</label>
+        <input type="text" id="checkNumber" name="check_number" required />
+    </div>
+    <div>
+        <label for="password">Password</label>
+        <input type="password" id="password" name="password" required />
+    </div>
+    <div>
+        <button type="submit">Login</button>
+    </div>
+</form>
+<p><a href="/signup">Create an account</a></p>
+</body>
+</html>
