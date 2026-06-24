@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>User Assets</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
+    <style>
+        body { background-color: #f8f9fa; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        .navbar { background-color: #0056b3 !important; }
+        .page-header { color: #0056b3; font-weight: 700; margin-bottom: 20px; }
+        .card { border: none; box-shadow: 0 2px 8px rgba(0,0,0,0.08); border-radius: 8px; }
+        .table thead { background-color: #0056b3; color: white; }
+        .user-info-badge { background-color: #0056b3; color: white; padding: 10px 15px; border-radius: 5px; display: inline-block; margin-bottom: 20px; }
+    </style>
+</head>
+<body>
+<nav class="navbar navbar-expand-lg navbar-dark">
+    <div class="container-lg">
+        <span class="navbar-brand">ICT Assets Tracking</span>
+        <div class="ms-auto">
+            <a th:href="@{/dashboard}" class="btn btn-light btn-sm me-2">Dashboard</a>
+            <a th:href="@{/logout}" class="btn btn-light btn-sm">Logout</a>
+        </div>
+    </div>
+</nav>
+
+<div class="container-lg mt-4">
+    <div class="mb-4">
+        <a href="/users" class="btn btn-secondary mb-3">← Back to Users</a>
+        <div class="user-info-badge mb-3">
+            <strong>User:</strong> <span th:text="${user.username}">alice</span> | 
+            <strong>Status:</strong> <span th:if="${user.enabled}" class="badge bg-success">Active</span><span th:unless="${user.enabled}" class="badge bg-secondary">Inactive</span>
+            <span th:if="${user.checkNumber != null}">| <strong>Check Number:</strong> <span th:text="${user.checkNumber}">123</span></span>
+        </div>
+        <form th:action="@{/users/{id}/assets(id=${user.id})}" method="get" class="row g-2 align-items-end">
+            <div class="col-sm-4">
+                <label for="checkNumber" class="form-label">Search by Check Number</label>
+                <input type="number" class="form-control" id="checkNumber" name="checkNumber" min="0" step="1" th:value="${searchCheckNumber}" placeholder="Enter check number" />
+            </div>
+            <div class="col-auto">
+                <button type="submit" class="btn btn-primary">Search</button>
+            </div>
+            <div class="col-auto">
+                <a th:href="@{/users/{id}/assets(id=${user.id})}" class="btn btn-outline-secondary">Reset</a>
+            </div>
+        </form>
+    </div>
+
+    <div class="d-flex align-items-center justify-content-between mb-3">
+        <h1 class="page-header mb-0">Assets Assigned to <span th:text="${user.username}">user</span></h1>
+        <div class="badge bg-primary fs-6 py-2 px-3">
+            Total Assets: <span th:text="${assetsCount}">0</span>
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="card-body p-0">
+            <div th:if="${#lists.isEmpty(assets)}" class="p-4 text-center text-muted">
+                <p>No assets assigned to this user.</p>
+            </div>
+            <div th:if="${not #lists.isEmpty(assets)}" class="table-responsive">
+                <table class="table table-hover mb-0">
+                    <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Name</th>
+                        <th>Serial Number</th>
+                        <th>Department</th>
+                        <th>Description</th>
+                        <th>Check Number</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr th:each="asset : ${assets}">
+                        <td th:text="${asset.id}">1</td>
+                        <td th:text="${asset.name}">Laptop</td>
+                        <td th:text="${asset.serialNumber}">SN12345</td>
+                        <td th:text="${asset.departmentName}">IT</td>
+                        <td th:text="${asset.description}">Description</td>
+                        <td th:text="${asset.checkNumber}">123</td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

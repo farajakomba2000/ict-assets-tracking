@@ -1,0 +1,223 @@
+﻿<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Bearer Asset Viewer</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
+    <style>
+        body {
+            background-color: #f8f9fa;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        .navbar {
+            background-color: #0056b3 !important;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        .navbar-brand {
+            font-weight: 700;
+            font-size: 1.5rem;
+        }
+        .container-main {
+            padding: 30px 0;
+        }
+        .page-header {
+            color: #0056b3;
+            font-weight: 700;
+            margin-bottom: 30px;
+            border-bottom: 3px solid #0056b3;
+            padding-bottom: 15px;
+        }
+        .action-bar {
+            margin-bottom: 30px;
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+        .btn-primary {
+            background-color: #0056b3;
+            border-color: #0056b3;
+            font-weight: 600;
+        }
+        .btn-primary:hover {
+            background-color: #003d82;
+            border-color: #003d82;
+        }
+        .card {
+            border: none;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            border-radius: 8px;
+            margin-bottom: 30px;
+        }
+        .card-header {
+            background-color: #0056b3;
+            color: white;
+            font-weight: 600;
+            border-radius: 8px 8px 0 0 !important;
+        }
+        .table thead {
+            background-color: #0056b3;
+            color: white;
+        }
+        .table tbody tr:hover {
+            background-color: #f0f4ff;
+        }
+        #tokenValue {
+            background-color: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 4px;
+            padding: 10px;
+            font-size: 0.85rem;
+            word-break: break-all;
+        }
+        #message {
+            color: #dc3545;
+            font-weight: 600;
+        }
+        .btn-logout {
+            background-color: white;
+            color: #0056b3;
+            border: 2px solid white;
+            font-weight: 600;
+        }
+        .btn-logout:hover {
+            background-color: #e9ecef;
+            color: #003d82;
+        }
+    </style>
+</head>
+<body>
+<nav class="navbar navbar-expand-lg navbar-dark">
+    <div class="container-lg">
+        <span class="navbar-brand">ICT Assets Viewer</span>
+        <div class="ms-auto">
+            <button id="logoutButton" class="btn btn-logout btn-sm">Logout</button>
+        </div>
+    </div>
+</nav>
+
+<div class="container-lg container-main">
+    <h1 class="page-header">Asset Viewer (Bearer Token)</h1>
+    
+    <div class="action-bar">
+        <button id="refreshButton" class="btn btn-primary">Refresh Assets</button>
+        <a href="/assets/new" class="btn btn-primary">Create Asset</a>
+    </div>
+
+    <div class="card" style="margin-bottom: 20px;">
+        <div class="card-header">
+            <h6 class="mb-0">Current Authentication Token</h6>
+        </div>
+        <div class="card-body">
+            <pre id="tokenValue" class="mb-0">(none)</pre>
+        </div>
+    </div>
+
+    <div id="message" class="alert alert-danger alert-dismissible fade show" role="alert" style="display: none;">
+        <span id="messageText"></span>
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+
+    <div class="card">
+        <div class="card-header">
+            <h5 class="mb-0">Assets</h5>
+        </div>
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-hover mb-0">
+                    <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Name</th>
+                        <th>Serial</th>
+                        <th>Department</th>
+                        <th>Description</th>
+                        <th>Owner</th>
+                    </tr>
+                    </thead>
+                    <tbody id="assetRows">
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+    const tokenValue = document.getElementById('tokenValue');
+    const assetRows = document.getElementById('assetRows');
+    const message = document.getElementById('message');
+    const messageText = document.getElementById('messageText');
+    const refreshButton = document.getElementById('refreshButton');
+    const logoutButton = document.getElementById('logoutButton');
+
+    function getBearerToken() {
+        return localStorage.getItem('bearerToken');
+    }
+
+    function showMessage(text) {
+        messageText.textContent = text;
+        message.style.display = 'block';
+    }
+
+    async function fetchAssets() {
+        const token = getBearerToken();
+        if (!token) {
+            showMessage('No bearer token found. Please log in first.');
+            return;
+        }
+
+        tokenValue.textContent = token;
+        message.textContent = '';
+        assetRows.innerHTML = '';
+
+        try {
+            const response = await fetch('/api/assets', {
+                headers: {
+                    'Authorization': token,
+                    'Accept': 'application/json'
+                }
+            });
+
+            if (!response.ok) {
+                if (response.status === 401 || response.status === 403) {
+                    showMessage('Authentication failed. Please log in again.');
+                } else {
+                    showMessage('Unable to load assets: ' + response.statusText);
+                }
+                return;
+            }
+
+            const assets = await response.json();
+            if (!Array.isArray(assets) || assets.length === 0) {
+                assetRows.innerHTML = '<tr><td colspan="6" class="text-center text-muted py-3">No assets found.</td></tr>';
+                return;
+            }
+
+            assets.forEach(asset => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${asset.id || ''}</td>
+                    <td><strong>${asset.name || ''}</strong></td>
+                    <td>${asset.serialNumber || ''}</td>
+                    <td>${asset.departmentName || ''}</td>
+                    <td>${asset.description || ''}</td>
+                    <td>${asset.ownerUsername || ''}</td>
+                `;
+                assetRows.appendChild(row);
+            });
+        } catch (error) {
+            showMessage('Error fetching assets: ' + error.message);
+        }
+    }
+
+    refreshButton.addEventListener('click', fetchAssets);
+    logoutButton.addEventListener('click', () => {
+        localStorage.removeItem('bearerToken');
+        window.location.href = '/login?logout';
+    });
+
+    fetchAssets();
+</script>
+</body>
+</html>
