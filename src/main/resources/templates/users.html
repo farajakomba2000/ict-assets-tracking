@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Users Management</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
+    <style>
+        body { background-color: #f8f9fa; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        .navbar { background-color: #0056b3 !important; }
+        .page-header { color: #0056b3; font-weight: 700; margin-bottom: 20px; }
+        .card { border: none; box-shadow: 0 2px 8px rgba(0,0,0,0.08); border-radius: 8px; }
+        .table thead { background-color: #0056b3; color: white; }
+        .btn-primary { background-color: #0056b3; border-color: #0056b3; }
+    </style>
+</head>
+<body>
+<nav class="navbar navbar-expand-lg navbar-dark">
+    <div class="container-lg">
+        <span class="navbar-brand">ICT Assets Tracking</span>
+        <div class="ms-auto">
+            <a th:href="@{/dashboard}" class="btn btn-light btn-sm me-2">Dashboard</a>
+            <a th:href="@{/logout}" class="btn btn-light btn-sm">Logout</a>
+        </div>
+    </div>
+</nav>
+
+<div class="container-lg mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h1 class="page-header">User Management</h1>
+        <a href="/users/new" class="btn btn-primary">New User</a>
+    </div>
+
+    <div class="card mb-3">
+        <div class="card-body">
+            <form class="row g-3" method="get" action="/users">
+                <div class="col-auto">
+                    <label for="searchCheckNumber" class="visually-hidden">Check Number</label>
+                    <input type="number" class="form-control" id="searchCheckNumber" name="searchCheckNumber" placeholder="Check number" min="0" th:value="${searchCheckNumber}" />
+                </div>
+                <div class="col-auto">
+                    <label for="searchName" class="visually-hidden">First Name or Last Name</label>
+                    <input type="text" class="form-control" id="searchName" name="searchName" placeholder="First name or last name" th:value="${searchName}" />
+                </div>
+                <div class="col-auto">
+                    <button type="submit" class="btn btn-outline-primary">Search</button>
+                </div>
+                <div class="col-auto">
+                    <label for="pageSize" class="visually-hidden">Page size</label>
+                    <select id="pageSize" name="size" class="form-select">
+                        <option th:selected="${pageSize == 5}" value="5">5</option>
+                        <option th:selected="${pageSize == 10}" value="10">10</option>
+                        <option th:selected="${pageSize == 20}" value="20">20</option>
+                        <option th:selected="${pageSize == 50}" value="50">50</option>
+                    </select>
+                </div>
+                <input type="hidden" name="page" th:value="${currentPage}" />
+            </form>
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-hover mb-0">
+                    <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Username</th>
+                        <th>Assigned Assets</th>
+                        <th>Enabled</th>
+                        <th>Roles</th>
+                        <th>Actions</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr th:each="user : ${users}">
+                        <td th:text="${user.id}">1</td>
+                        <td th:text="${user.displayName}">alice</td>
+                        <td th:text="${assetCounts[user.id]}">0</td>
+                        <td>
+                            <span th:if="${user.enabled}" class="badge bg-success">Active</span>
+                            <span th:unless="${user.enabled}" class="badge bg-secondary">Inactive</span>
+                        </td>
+                        <td th:text="${#strings.arrayJoin(user.roles.toArray(), ', ')}">ROLE_USER</td>
+                        <td>
+                            <a th:href="@{/users/{id}/assets(id=${user.id})}" class="btn btn-sm btn-info">View Assets</a>
+                            <a th:href="@{/users/{id}/roles/add(id=${user.id})}" class="btn btn-sm btn-primary">Add Role</a>
+                            <a th:href="@{/users/{id}/reset-password(id=${user.id})}" class="btn btn-sm btn-secondary" style="margin-left: .25rem;">Reset Password</a>
+                            <form th:if="${user.enabled}" th:action="@{/users/{id}/deactivate(id=${user.id})}" method="post" style="display:inline; margin-left: .25rem;">
+                                <button type="submit" class="btn btn-sm btn-warning">Deactivate</button>
+                            </form>
+                            <form th:unless="${user.enabled}" th:action="@{/users/{id}/activate(id=${user.id})}" method="post" style="display:inline; margin-left: .25rem;">
+                                <button type="submit" class="btn btn-sm btn-success">Activate</button>
+                            </form>
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <div class="d-flex justify-content-between align-items-center mt-3">
+        <div>
+            <span class="text-muted">Page <strong th:text="${currentPage + 1}">1</strong> of <strong th:text="${totalPages}">1</strong></span>
+        </div>
+        <nav aria-label="Users pagination">
+            <ul class="pagination mb-0">
+                <li class="page-item" th:classappend="${currentPage == 0} ? 'disabled'">
+                    <a class="page-link" th:href="@{/users(page=${currentPage - 1}, size=${pageSize}, searchCheckNumber=${searchCheckNumber}, searchName=${searchName})}">Previous</a>
+                </li>
+                <li class="page-item" th:each="pageNumber : ${pageNumbers}" th:classappend="${pageNumber == currentPage} ? 'active'">
+                    <a class="page-link" th:href="@{/users(page=${pageNumber}, size=${pageSize}, searchCheckNumber=${searchCheckNumber}, searchName=${searchName})}" th:text="${pageNumber + 1}">1</a>
+                </li>
+                <li class="page-item" th:classappend="${currentPage + 1 >= totalPages} ? 'disabled'">
+                    <a class="page-link" th:href="@{/users(page=${currentPage + 1}, size=${pageSize}, searchCheckNumber=${searchCheckNumber}, searchName=${searchName})}">Next</a>
+                </li>
+            </ul>
+        </nav>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

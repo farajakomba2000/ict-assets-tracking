@@ -1,0 +1,414 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Asset List</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
+    <style>
+        body {
+            background-color: #f8f9fa;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        .navbar {
+            background-color: #0056b3 !important;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        .navbar-brand {
+            font-weight: 700;
+            font-size: 1.5rem;
+        }
+        .container-main {
+            padding: 30px 0;
+        }
+        .page-header {
+            color: #0056b3;
+            font-weight: 700;
+            margin-bottom: 30px;
+            border-bottom: 3px solid #0056b3;
+            padding-bottom: 15px;
+        }
+        .card {
+            border: none;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            border-radius: 8px;
+            margin-bottom: 30px;
+        }
+        .card-header {
+            background-color: #0056b3;
+            color: white;
+            font-weight: 600;
+            border-radius: 8px 8px 0 0 !important;
+        }
+        .table thead {
+            background-color: #0056b3;
+            color: white;
+        }
+        .table tbody tr:hover {
+            background-color: #f0f4ff;
+        }
+        .btn-primary {
+            background-color: #0056b3;
+            border-color: #0056b3;
+            font-weight: 600;
+        }
+        .btn-primary:hover {
+            background-color: #003d82;
+            border-color: #003d82;
+        }
+        .btn-danger {
+            background-color: #dc3545;
+            border-color: #dc3545;
+        }
+        .form-control:focus {
+            border-color: #0056b3;
+            box-shadow: 0 0 0 0.2rem rgba(0, 86, 179, 0.25);
+        }
+        .btn-logout {
+            background-color: white;
+            color: #0056b3;
+            border: 2px solid white;
+            font-weight: 600;
+        }
+        .btn-logout:hover {
+            background-color: #e9ecef;
+            color: #003d82;
+        }
+    </style>
+</head>
+<body>
+<nav class="navbar navbar-expand-lg navbar-dark">
+    <div class="container-lg">
+        <span class="navbar-brand">ICT Assets Tracking</span>
+        <div class="ms-auto">
+            <a th:href="@{/dashboard}" class="btn btn-light btn-sm me-2">Dashboard</a>
+            <a th:href="@{/logout}" class="btn btn-logout btn-sm">Logout</a>
+        </div>
+    </div>
+</nav>
+
+<div class="container-lg container-main">
+    <h1 class="page-header">Assets Management</h1>
+    <div class="card">
+        <div class="card-header">
+            <h5 class="mb-0">Register New Asset</h5>
+        </div>
+        <div class="card-body">
+            <div th:if="${errorMessage}" class="alert alert-danger alert-dismissible fade show" role="alert">
+                <strong>Error:</strong> <span th:text="${errorMessage}"></span>
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+            <form th:action="@{/assets}" th:object="${asset}" method="post">
+                <input type="hidden" th:field="*{id}" />
+                
+                <div class="mb-3">
+                    <label class="form-label">Assignment Type</label>
+                    <div>
+                        <div class="form-check form-check-inline">
+                            <input class="form-check-input" type="radio" id="assignmentIndividual" name="assignmentType" th:field="*{assignmentType}" value="Individual" />
+                            <label class="form-check-label" for="assignmentIndividual">Individual</label>
+                        </div>
+                        <div class="form-check form-check-inline">
+                            <input class="form-check-input" type="radio" id="assignmentInstitution" name="assignmentType" th:field="*{assignmentType}" value="Institution" />
+                            <label class="form-check-label" for="assignmentInstitution">Institution</label>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="mb-3" id="userSearchGroup">
+                    <label for="userSearch" class="form-label">Owner (Search by Name)</label>
+                    <input type="text" class="form-control" id="userSearch" placeholder="Search by first or last name..." autocomplete="off" />
+                    <div id="userSearchResults" class="list-group mt-2" style="display: none; position: absolute; z-index: 1000; width: 94%;"></div>
+                </div>
+                
+                <div class="mb-3" id="institutionDepartmentGroup" style="display: none;">
+                    <label for="departmentName" class="form-label">Department</label>
+                    <select class="form-control" id="departmentName" th:field="*{departmentName}">
+                        <option value="">-- Select a Department --</option>
+                        <option th:each="dept : ${distinctDepartments}" th:value="${dept}" th:text="${dept}"></option>
+                    </select>
+                </div>
+                
+                <div class="mb-3" id="checkNumberGroup">
+                    <label for="checkNumber" class="form-label">Check Number</label>
+                    <input type="number" class="form-control" id="checkNumber" th:field="*{checkNumber}" required readonly />
+                </div>
+
+                <div class="mb-3">
+                    <label for="mainCategory" class="form-label">Category</label>
+                    <select class="form-control" id="mainCategory" th:field="*{mainCategoryId}">
+                        <option value="">-- Select a Category --</option>
+                        <option th:each="mc : ${mainCategories}" th:value="${mc.id}" th:text="${mc.name}">Category</option>
+                    </select>
+                </div>
+
+                <div class="mb-3">
+                    <label for="category" class="form-label">Subcategory</label>
+                    <select class="form-control" id="category" th:field="*{categoryId}">
+                        <option value="">-- Select a Subcategory --</option>
+                    </select>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">Name</label>
+                    <input type="text" class="form-control" id="name" th:field="*{name}" readonly />
+                </div>
+
+                <div class="mb-3">
+                    <label for="serialNumber" class="form-label">Serial Number <span class="text-danger">*</span></label>
+                    <input type="text" class="form-control" id="serialNumber" th:field="*{serialNumber}" required />
+                </div>
+                
+                <div class="mb-3">
+                    <label for="tsnCode" class="form-label">TSN Code</label>
+                    <input type="text" class="form-control" id="tsnCode" th:field="*{tsnCode}" />
+                </div>
+                
+                <div class="mb-3">
+                    <label for="description" class="form-label">Description</label>
+                    <textarea class="form-control" id="description" th:field="*{description}" rows="3"></textarea>
+                </div>
+                
+                <button type="submit" class="btn btn-primary">Register Asset</button>
+            </form>
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="card-header">
+            <h5 class="mb-0">Assets List</h5>
+        </div>
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-hover mb-0">
+                    <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Name</th>
+                        <th>Serial</th>
+                        <th>Department</th>
+                        <th>Description</th>
+                        <th>Owner</th>
+                        <th>Actions</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr th:each="asset : ${assets}">
+                        <td th:text="${asset.id}">1</td>
+                        <td th:text="${asset.name}">Example</td>
+                        <td th:text="${asset.serialNumber}">SN</td>
+                        <td th:text="${asset.departmentName}">IT</td>
+                        <td th:text="${asset.description}">Description</td>
+                        <td>
+                            <span th:if="${asset.ownerUsername}">
+                                <span th:text="${asset.ownerUsername}">Owner</span>
+                            </span>
+                            <span th:unless="${asset.ownerUsername}">
+                                <span th:if="${asset.ownerFirstName}">
+                                    <span th:text="${asset.ownerFirstName}">First</span>
+                                    <span th:if="${asset.ownerLastName}" th:text="${' ' + asset.ownerLastName}">Last</span>
+                                </span>
+                                <span th:unless="${asset.ownerFirstName}">-</span>
+                            </span>
+                        </td>
+                        <td>
+                            <a th:href="@{/assets/{id}/edit(id=${asset.id})}" class="btn btn-sm btn-primary">Edit</a>
+                            <form th:action="@{/assets/{id}/delete(id=${asset.id})}" method="post" style="display:inline; margin-left: 0.25rem;">
+                                <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('Are you sure you want to delete this asset?');">Delete</button>
+                            </form>
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+            <div class="d-flex justify-content-between align-items-center p-3 border-top">
+                <div class="text-muted small">
+                    <span th:if="${totalElements > 0}">
+                        Showing <span th:text="${currentPage * pageSize + 1}">1</span> to 
+                        <span th:text="${(currentPage + 1) * pageSize > totalElements ? totalElements : (currentPage + 1) * pageSize}">10</span>
+                        of <span th:text="${totalElements}">0</span> assets
+                    </span>
+                    <span th:unless="${totalElements > 0}">No assets found</span>
+                </div>
+                <nav th:if="${totalPages > 1}">
+                    <ul class="pagination mb-0" style="font-size: 0.875rem;">
+                        <li class="page-item" th:classappend="${currentPage == 0 ? 'disabled' : ''}">
+                            <a class="page-link" th:href="@{/assets(page=0, size=${pageSize})}" th:if="${currentPage != 0}">First</a>
+                            <span class="page-link" th:if="${currentPage == 0}">First</span>
+                        </li>
+                        <li class="page-item" th:classappend="${currentPage == 0 ? 'disabled' : ''}">
+                            <a class="page-link" th:href="@{/assets(page=${currentPage - 1}, size=${pageSize})}" th:if="${currentPage != 0}">Previous</a>
+                            <span class="page-link" th:if="${currentPage == 0}">Previous</span>
+                        </li>
+                        
+                        <li class="page-item" th:each="i : ${#numbers.sequence(0, totalPages - 1)}" 
+                            th:classappend="${i == currentPage ? 'active' : ''}">
+                            <a class="page-link" th:href="@{/assets(page=${i}, size=${pageSize})}" 
+                               th:text="${i + 1}"
+                               th:if="${i != currentPage}">1</a>
+                            <span class="page-link" th:if="${i == currentPage}" th:text="${i + 1}">1</span>
+                        </li>
+                        
+                        <li class="page-item" th:classappend="${currentPage == totalPages - 1 ? 'disabled' : ''}">
+                            <a class="page-link" th:href="@{/assets(page=${currentPage + 1}, size=${pageSize})}" th:if="${currentPage != totalPages - 1}">Next</a>
+                            <span class="page-link" th:if="${currentPage == totalPages - 1}">Next</span>
+                        </li>
+                        <li class="page-item" th:classappend="${currentPage == totalPages - 1 ? 'disabled' : ''}">
+                            <a class="page-link" th:href="@{/assets(page=${totalPages - 1}, size=${pageSize})}" th:if="${currentPage != totalPages - 1}">Last</a>
+                            <span class="page-link" th:if="${currentPage == totalPages - 1}">Last</span>
+                        </li>
+                    </ul>
+                </nav>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+    const categorySelect = document.getElementById('category');
+    const nameInput = document.getElementById('name');
+    const userSearch = document.getElementById('userSearch');
+    const userSearchResults = document.getElementById('userSearchResults');
+    const checkNumberInput = document.getElementById('checkNumber');
+    const assignmentIndividual = document.getElementById('assignmentIndividual');
+    const assignmentInstitution = document.getElementById('assignmentInstitution');
+    const userSearchGroup = document.getElementById('userSearchGroup');
+    const institutionDepartmentGroup = document.getElementById('institutionDepartmentGroup');
+    const checkNumberGroup = document.getElementById('checkNumberGroup');
+    let searchTimeout;
+
+    function updateAssignmentMode() {
+        const assignmentType = assignmentInstitution.checked ? 'Institution' : 'Individual';
+        if (assignmentType === 'Institution') {
+            userSearchGroup.style.display = 'none';
+            institutionDepartmentGroup.style.display = 'block';
+            if (checkNumberGroup) {
+                checkNumberGroup.style.display = 'none';
+                const input = checkNumberGroup.querySelector('input');
+                if (input) {
+                    input.removeAttribute('required');
+                    input.value = '';
+                }
+            }
+            userSearch.value = '';
+        } else {
+            userSearchGroup.style.display = 'block';
+            institutionDepartmentGroup.style.display = 'none';
+            if (checkNumberGroup) {
+                checkNumberGroup.style.display = 'block';
+                const input = checkNumberGroup.querySelector('input');
+                if (input) input.setAttribute('required', 'required');
+            }
+        }
+    }
+
+    assignmentIndividual.addEventListener('change', updateAssignmentMode);
+    assignmentInstitution.addEventListener('change', updateAssignmentMode);
+
+    window.addEventListener('load', updateAssignmentMode);
+
+    function updateNameFromCategory() {
+        const selectedOption = categorySelect.options[categorySelect.selectedIndex];
+        if (selectedOption && selectedOption.value) {
+            nameInput.value = selectedOption.textContent;
+        }
+    }
+
+    document.getElementById('mainCategory').addEventListener('change', function() {
+        const mainCategoryId = this.value;
+        categorySelect.innerHTML = '<option value="">-- Select a Subcategory --</option>';
+        
+        if (mainCategoryId) {
+            fetch(`/api/categories/${mainCategoryId}`)
+                .then(response => response.json())
+                .then(categories => {
+                    categories.forEach(category => {
+                        const option = document.createElement('option');
+                        option.value = category.id;
+                        option.textContent = category.name;
+                        categorySelect.appendChild(option);
+                    });
+                    updateNameFromCategory();
+                })
+                .catch(error => console.error('Error loading subcategories:', error));
+        }
+    });
+
+    categorySelect.addEventListener('change', updateNameFromCategory);
+
+    // Trigger change event on page load if mainCategory has a value
+    window.addEventListener('load', function() {
+        const mainCategorySelect = document.getElementById('mainCategory');
+        if (mainCategorySelect.value) {
+            mainCategorySelect.dispatchEvent(new Event('change'));
+        }
+    });
+
+    // User search autocomplete
+    userSearch.addEventListener('input', function() {
+        clearTimeout(searchTimeout);
+        const query = this.value.trim();
+        
+        if (query.length < 2) {
+            userSearchResults.style.display = 'none';
+            return;
+        }
+
+        searchTimeout = setTimeout(() => {
+            fetch(`/api/users/search?q=${encodeURIComponent(query)}`)
+                .then(response => response.json())
+                .then(users => {
+                    userSearchResults.innerHTML = '';
+                    if (users.length === 0) {
+                        userSearchResults.style.display = 'none';
+                        return;
+                    }
+                    
+                    users.forEach(user => {
+                        const resultItem = document.createElement('button');
+                        resultItem.type = 'button';
+                        resultItem.className = 'list-group-item list-group-item-action';
+                        resultItem.innerHTML = `
+                            <div><strong>${user.fullName}</strong></div>
+                            <small class="text-muted">${user.departmentName || 'No Department'}</small>
+                        `;
+                        resultItem.addEventListener('click', function(e) {
+                            e.preventDefault();
+                            userSearch.value = user.fullName;
+                            checkNumberInput.value = user.checkNumber;
+                            userSearchResults.style.display = 'none';
+                        });
+                        userSearchResults.appendChild(resultItem);
+                    });
+                    userSearchResults.style.display = 'block';
+                })
+                .catch(error => console.error('Error searching users:', error));
+        }, 300);
+    });
+
+    // Hide results when clicking outside
+    document.addEventListener('click', function(e) {
+        if (e.target !== userSearch && e.target !== userSearchResults) {
+            userSearchResults.style.display = 'none';
+        }
+    });
+
+    // Validate Check Number input to accept only numbers
+    checkNumberInput.addEventListener('keypress', function(e) {
+        if (!/[0-9]/.test(e.key)) {
+            e.preventDefault();
+        }
+    });
+    
+    // Prevent paste of non-numeric values
+    checkNumberInput.addEventListener('paste', function(e) {
+        e.preventDefault();
+        const pastedText = (e.clipboardData || window.clipboardData).getData('text');
+        if (/^[0-9]*$/.test(pastedText)) {
+            checkNumberInput.value = pastedText;
+        }
+    });
+</script>
+</body>
+</html>
