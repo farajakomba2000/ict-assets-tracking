@@ -74,8 +74,8 @@
                     </tr>
                     </thead>
                     <tbody>
-                    <tr th:each="user : ${users}">
-                        <td th:text="${user.id}">1</td>
+                    <tr th:each="user,iterStat : ${users}">
+                        <td th:text="${currentPage * pageSize + iterStat.index + 1}">1</td>
                         <td th:text="${user.displayName}">alice</td>
                         <td th:text="${assetCounts[user.id]}">0</td>
                         <td>

@@ -5,6 +5,43 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title th:text="${asset.id} == null ? 'Create Asset' : 'Edit Asset'">Asset Form</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
+    <style>
+        .assignment-option {
+            min-width: 180px;
+            margin: 0;
+            padding: 14px 16px;
+            border: 2px solid #ced4da;
+            border-radius: 8px;
+            background: white;
+            cursor: pointer;
+            transition: all 0.15s ease-in-out;
+        }
+        .assignment-option:hover {
+            border-color: #0d6efd;
+            background: #f4f8ff;
+        }
+        .assignment-option:has(.form-check-input:checked) {
+            border-color: #0d6efd;
+            background: #eaf2ff;
+            box-shadow: 0 0 0 3px rgba(13, 110, 253, 0.12);
+        }
+        .assignment-option .form-check-input {
+            width: 1.35em;
+            height: 1.35em;
+            margin-top: 0.05em;
+            border: 2px solid #495057;
+        }
+        .assignment-option .form-check-input:checked {
+            border-color: #0d6efd;
+            background-color: #0d6efd;
+        }
+        .assignment-option .form-check-label {
+            font-size: 1.05rem;
+            font-weight: 700;
+            color: #212529;
+            cursor: pointer;
+        }
+    </style>
 </head>
 <body>
 <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
@@ -32,14 +69,13 @@
                         <input type="hidden" th:field="*{id}" />
                         
                         <div class="mb-3">
-                            <label class="form-label">Assignment Type</label>
-                            <div>
-                                <div class="form-check form-check-inline">
-                                    <input class="form-check-input" type="radio" id="assignmentIndividual" name="assignmentType" th:field="*{assignmentType}" value="Individual" />
+                            <div class="d-flex gap-3">
+                                <div class="form-check assignment-option">
+                                    <input class="form-check-input" type="radio" id="assignmentIndividual" name="assignmentType" th:field="*{assignmentType}" value="Individual" th:checked="${#strings.isEmpty(asset.assignmentType) or asset.assignmentType == 'Individual'} ? 'checked' : null" />
                                     <label class="form-check-label" for="assignmentIndividual">Individual</label>
                                 </div>
-                                <div class="form-check form-check-inline">
-                                    <input class="form-check-input" type="radio" id="assignmentInstitution" name="assignmentType" th:field="*{assignmentType}" value="Institution" />
+                                <div class="form-check assignment-option">
+                                    <input class="form-check-input" type="radio" id="assignmentInstitution" name="assignmentType" th:field="*{assignmentType}" value="Institution" th:checked="${asset.assignmentType == 'Institution'}" />
                                     <label class="form-check-label" for="assignmentInstitution">Institution</label>
                                 </div>
                             </div>
@@ -82,8 +118,8 @@
                         </div>
                         
                         <div class="mb-3">
-                            <label class="form-label">Name</label>
-                            <input type="text" class="form-control" id="name" th:field="*{name}" required readonly />
+                            <label class="form-label">Asset Name &amp; Model</label>
+                            <input type="text" class="form-control" id="name" th:field="*{name}" required />
                         </div>
                         <div class="mb-3">
                             <label for="serialNumber" class="form-label">Serial Number</label>

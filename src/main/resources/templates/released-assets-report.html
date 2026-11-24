@@ -37,7 +37,8 @@
                     </thead>
                     <tbody>
                         <tr th:each="asset : ${releasedAssets}">
-                            <td th:text="${asset.id}">1</td>
+                                <tr th:each="asset,iterStat : ${releasedAssets}">
+                                <td th:text="${iterStat.index + 1}">1</td>
                             <td th:text="${asset.name}">Asset</td>
                             <td th:text="${asset.serialNumber}">SN</td>
                             <td th:text="${asset.departmentName}">Dept</td>

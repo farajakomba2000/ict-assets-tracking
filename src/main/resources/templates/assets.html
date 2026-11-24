@@ -74,6 +74,41 @@
             background-color: #e9ecef;
             color: #003d82;
         }
+        .assignment-option {
+            min-width: 180px;
+            margin: 0;
+            padding: 14px 16px;
+            border: 2px solid #ced4da;
+            border-radius: 8px;
+            background: white;
+            cursor: pointer;
+            transition: all 0.15s ease-in-out;
+        }
+        .assignment-option:hover {
+            border-color: #0056b3;
+            background: #f4f8ff;
+        }
+        .assignment-option:has(.form-check-input:checked) {
+            border-color: #0056b3;
+            background: #eaf2ff;
+            box-shadow: 0 0 0 3px rgba(0, 86, 179, 0.12);
+        }
+        .assignment-option .form-check-input {
+            width: 1.35em;
+            height: 1.35em;
+            margin-top: 0.05em;
+            border: 2px solid #495057;
+        }
+        .assignment-option .form-check-input:checked {
+            border-color: #0056b3;
+            background-color: #0056b3;
+        }
+        .assignment-option .form-check-label {
+            font-size: 1.05rem;
+            font-weight: 700;
+            color: #212529;
+            cursor: pointer;
+        }
     </style>
 </head>
 <body>
@@ -102,14 +137,13 @@
                 <input type="hidden" th:field="*{id}" />
                 
                 <div class="mb-3">
-                    <label class="form-label">Assignment Type</label>
-                    <div>
-                        <div class="form-check form-check-inline">
-                            <input class="form-check-input" type="radio" id="assignmentIndividual" name="assignmentType" th:field="*{assignmentType}" value="Individual" />
+                    <div class="d-flex gap-3">
+                        <div class="form-check assignment-option">
+                            <input class="form-check-input" type="radio" id="assignmentIndividual" name="assignmentType" th:field="*{assignmentType}" value="Individual" th:checked="${#strings.isEmpty(asset.assignmentType) or asset.assignmentType == 'Individual'} ? 'checked' : null" />
                             <label class="form-check-label" for="assignmentIndividual">Individual</label>
                         </div>
-                        <div class="form-check form-check-inline">
-                            <input class="form-check-input" type="radio" id="assignmentInstitution" name="assignmentType" th:field="*{assignmentType}" value="Institution" />
+                        <div class="form-check assignment-option">
+                            <input class="form-check-input" type="radio" id="assignmentInstitution" name="assignmentType" th:field="*{assignmentType}" value="Institution" th:checked="${asset.assignmentType == 'Institution'}" />
                             <label class="form-check-label" for="assignmentInstitution">Institution</label>
                         </div>
                     </div>
@@ -150,8 +184,8 @@
                 </div>
 
                 <div class="mb-3">
-                    <label class="form-label">Name</label>
-                    <input type="text" class="form-control" id="name" th:field="*{name}" readonly />
+                    <label class="form-label">Asset Name &amp; Model</label>
+                    <input type="text" class="form-control" id="name" th:field="*{name}" />
                 </div>
 
                 <div class="mb-3">
@@ -193,8 +227,8 @@
                     </tr>
                     </thead>
                     <tbody>
-                    <tr th:each="asset : ${assets}">
-                        <td th:text="${asset.id}">1</td>
+                    <tr th:each="asset,iterStat : ${assets}">
+                        <td th:text="${iterStat.index + 1}">1</td>
                         <td th:text="${asset.name}">Example</td>
                         <td th:text="${asset.serialNumber}">SN</td>
                         <td th:text="${asset.departmentName}">IT</td>

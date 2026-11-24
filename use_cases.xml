@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<useCaseDiagram>
+  <title>Advertising Workflow Use Cases</title>
+  <actors>
+    <actor id="customer">Customer</actor>
+    <actor id="salesOfficer">Sales Officer</actor>
+    <actor id="salesManager">Sales Manager</actor>
+    <actor id="dsm">Director of Marketing</actor>
+    <actor id="dg">Director General</actor>
+    <actor id="dls">DLS</actor>
+    <actor id="legalOfficer">Legal Officer</actor>
+    <actor id="attorneyGeneral">Attorney General</actor>
+    <actor id="revenueAccountant">Revenue Accountant</actor>
+    <actor id="dtvs">DTVS/DRA</actor>
+    <actor id="producer">Producer</actor>
+    <actor id="hlu">HLU / Radio Producer</actor>
+  </actors>
+
+  <useCases>
+    <useCase id="UC-01" name="Register Customer and Capture Client Information" actors="customer">
+      <description>Customer registers on the web portal or mobile app and provides client-specific information such as NIN, passport number, TIN, business license, and work permit.</description>
+    </useCase>
+
+    <useCase id="UC-02" name="Initiate Service Request" actors="customer">
+      <description>Registered customer creates a new service request for an advertising campaign or program.</description>
+    </useCase>
+
+    <useCase id="UC-03" name="Review Request and Determine Payment Terms" actors="salesOfficer">
+      <description>Sales Officer receives the request, identifies payment mode, checks discount support, and consults production team when necessary.</description>
+    </useCase>
+
+    <useCase id="UC-04" name="Route Approval for Post-Payment Request" actors="salesOfficer salesManager dsm dg">
+      <description>System retrieves the credit limit and routes approval based on the amount thresholds for post-payment requests.</description>
+    </useCase>
+
+    <useCase id="UC-05" name="Route Approval for Pre-Payment Request" actors="salesOfficer salesManager dsm dg">
+      <description>For pre-payment requests, the system notifies SM for no-discount requests and routes approved discount cases to DSM or DG based on discount percentage.</description>
+    </useCase>
+
+    <useCase id="UC-06" name="Prepare and Submit Draft Contract" actors="salesOfficer salesManager">
+      <description>Sales Officer prepares the draft contract and submits it to SM for verification and decision.</description>
+    </useCase>
+
+    <useCase id="UC-07" name="Contract Review and Legal Vetting" actors="dsm dls legalOfficer attorneyGeneral">
+      <description>DSM reviews the contract, DLS manages legal review, and AG provides advice for contracts of TZS 1 billion or more.</description>
+    </useCase>
+
+    <useCase id="UC-08" name="Final Contract Signature and Customer Presentation" actors="dg dsm salesOfficer customer">
+      <description>DG signs the contract, DSM executes it, and the Sales Officer presents it to the customer for signing.</description>
+    </useCase>
+
+    <useCase id="UC-09" name="Generate Pro Forma Invoice" actors="salesOfficer revenueAccountant customer">
+      <description>Sales Officer generates a pro forma invoice for post-payment or pre-payment requests and sends it to the relevant party.</description>
+    </useCase>
+
+    <useCase id="UC-10" name="Capture Production Metadata and Submit for Production" actors="salesOfficer dtvs producer">
+      <description>Sales Officer captures metadata, attaches required documents, and submits the production task to DTVS/DRA and Producer.</description>
+    </useCase>
+
+    <useCase id="UC-11" name="Customer Review and Final Acceptance" actors="customer dsm">
+      <description>DSM notifies customer of production completion. Customer reviews the production and either returns it for correction or accepts it.</description>
+    </useCase>
+
+    <useCase id="UC-12" name="Resolve Schedule Conflict and Effect Media List" actors="hlu dsm salesOfficer">
+      <description>System checks schedule conflicts with PRO, notifies HLU/Radio Producer, and updates the media list or AVRA accordingly.</description>
+    </useCase>
+  </useCases>
+</useCaseDiagram>

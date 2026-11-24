@@ -57,7 +57,9 @@ public class AssetViewController {
         model.addAttribute("totalPages", assetsPage.getTotalPages());
         model.addAttribute("totalElements", assetsPage.getTotalElements());
         
-        model.addAttribute("asset", new AssetDto());
+        AssetDto asset = new AssetDto();
+        asset.setAssignmentType("Individual");
+        model.addAttribute("asset", asset);
         model.addAttribute("mainCategories", mainCategoryRepository.findAll());
         model.addAttribute("distinctDepartments", userRepository.findDistinctDepartmentNames());
         return "assets";
@@ -66,6 +68,7 @@ public class AssetViewController {
     @GetMapping({"/assets/new", "/assets/register"})
     public String createForm(Model model, Principal principal) {
         AssetDto asset = new AssetDto();
+        asset.setAssignmentType("Individual");
         
         // Auto-populate check number from logged-in user
         if (principal != null) {
@@ -97,7 +100,9 @@ public class AssetViewController {
 
     @GetMapping("/assets/release")
     public String releaseForm(Model model) {
-        model.addAttribute("asset", new AssetDto());
+        AssetDto releaseAsset = new AssetDto();
+        releaseAsset.setAssignmentType("Institution");
+        model.addAttribute("asset", releaseAsset);
         model.addAttribute("notReleasedAssets", assetService.listAllAssets().stream()
                 .filter(asset -> !asset.isIsreleased())
                 .collect(Collectors.toList()));
