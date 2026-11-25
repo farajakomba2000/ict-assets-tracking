@@ -10,16 +10,19 @@ import org.springframework.web.bind.annotation.GetMapping;
 import com.example.ictassetstracking.dto.UserDto;
 import com.example.ictassetstracking.service.AssetService;
 import com.example.ictassetstracking.service.UserService;
+import com.example.ictassetstracking.repository.UserRepository;
 
 @Controller
 public class DashboardController {
 
     private final AssetService assetService;
     private final UserService userService;
+    private final UserRepository userRepository;
 
-    public DashboardController(AssetService assetService, UserService userService) {
+    public DashboardController(AssetService assetService, UserService userService, UserRepository userRepository) {
         this.assetService = assetService;
         this.userService = userService;
+        this.userRepository = userRepository;
     }
 
     @GetMapping("/dashboard")
@@ -46,6 +49,8 @@ public class DashboardController {
         } else {
             model.addAttribute("myAssetCount", countCurrentUserAssets());
         }
+
+        model.addAttribute("loggedInFirstName", getLoggedInFirstName());
 
         return "dashboard";
     }
@@ -207,5 +212,24 @@ public class DashboardController {
             fullName = user.getUsername();
         }
         return fullName;
+    }
+
+    private String getLoggedInFirstName() {
+        org.springframework.security.core.Authentication authentication =
+                org.springframework.security.core.context.SecurityContextHolder.getContext().getAuthentication();
+        if (authentication == null || authentication.getName() == null) {
+            return "";
+        }
+
+        try {
+            Long checkNumber = Long.valueOf(authentication.getName());
+            return userRepository.findByCheckNumber(checkNumber)
+                    .map(user -> user.getFirstName() != null && !user.getFirstName().isBlank()
+                            ? user.getFirstName().trim()
+                            : user.getUsername())
+                    .orElse("User");
+        } catch (NumberFormatException ex) {
+            return authentication.getName();
+        }
     }
 }

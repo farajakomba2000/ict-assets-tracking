@@ -21,7 +21,8 @@
 <nav class="navbar navbar-expand-lg navbar-dark">
     <div class="container-lg">
         <a class="navbar-brand" th:href="@{/dashboard}">TSN ICT Assets Management</a>
-        <div class="ms-auto">
+        <div class="ms-auto d-flex align-items-center">
+            <span class="text-white fw-semibold me-3" th:text="${loggedInFirstName}">User</span>
             <a th:href="@{/dashboard}" class="btn btn-light btn-sm me-2">Dashboard</a>
             <a th:href="@{/logout}" class="btn btn-light btn-sm">Logout</a>
         </div>
