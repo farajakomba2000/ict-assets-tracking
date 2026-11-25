@@ -115,7 +115,7 @@ public class AssetServiceImpl implements AssetService {
         }
 
         Asset asset = new Asset(
-            category != null ? category.getName() : dto.getName(),
+            dto.getName(),
                 dto.getSerialNumber(),
                 dto.getDescription(),
                 departmentName,
@@ -185,7 +185,7 @@ public class AssetServiceImpl implements AssetService {
             checkNumber = 0L;
         }
 
-        asset.setName(category != null ? category.getName() : dto.getName());
+        asset.setName(dto.getName());
         asset.setSerialNumber(dto.getSerialNumber());
         asset.setDescription(dto.getDescription());
         asset.setDepartmentName(departmentName);
@@ -375,7 +375,7 @@ public class AssetServiceImpl implements AssetService {
                 : dto.getDepartmentName();
 
         Asset asset = new Asset(
-            category != null ? category.getName() : dto.getName(),
+            dto.getName(),
                 dto.getSerialNumber(),
                 dto.getDescription(),
                 departmentName,
@@ -423,7 +423,7 @@ public class AssetServiceImpl implements AssetService {
         }
         asset.setCategory(category);
 
-        asset.setName(category != null ? category.getName() : dto.getName());
+        asset.setName(dto.getName());
         asset.setSerialNumber(dto.getSerialNumber());
         asset.setDescription(dto.getDescription());
         String departmentName = user.getDepartmentName() != null && !user.getDepartmentName().isBlank()
