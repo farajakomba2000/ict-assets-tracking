@@ -223,6 +223,8 @@
                         <th>Department</th>
                         <th>Description</th>
                         <th>Owner</th>
+                        <th>Category</th>
+                        <th>Subcategory</th>
                         <th>Actions</th>
                     </tr>
                     </thead>
@@ -233,18 +235,9 @@
                         <td th:text="${asset.serialNumber}">SN</td>
                         <td th:text="${asset.departmentName}">IT</td>
                         <td th:text="${asset.description}">Description</td>
-                        <td>
-                            <span th:if="${asset.ownerUsername}">
-                                <span th:text="${asset.ownerUsername}">Owner</span>
-                            </span>
-                            <span th:unless="${asset.ownerUsername}">
-                                <span th:if="${asset.ownerFirstName}">
-                                    <span th:text="${asset.ownerFirstName}">First</span>
-                                    <span th:if="${asset.ownerLastName}" th:text="${' ' + asset.ownerLastName}">Last</span>
-                                </span>
-                                <span th:unless="${asset.ownerFirstName}">-</span>
-                            </span>
-                        </td>
+                        <td th:text="${asset.ownerDisplayName} ?: '-'">Owner</td>
+                        <td th:text="${asset.mainCategoryName} ?: '-'">Category</td>
+                        <td th:text="${asset.categoryName} ?: '-'">Subcategory</td>
                         <td>
                             <a th:href="@{/assets/{id}/edit(id=${asset.id})}" class="btn btn-sm btn-primary">Edit</a>
                             <form th:action="@{/assets/{id}/delete(id=${asset.id})}" method="post" style="display:inline; margin-left: 0.25rem;">

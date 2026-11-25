@@ -2,6 +2,10 @@ INSERT INTO user_account (id, username, password, enabled, check_number) VALUES 
 INSERT INTO user_account (id, username, password, enabled, check_number) VALUES (2, 'bob', '$2a$10$DOWSD1rzpS60MWTQicYKuOFGG9kW3nqOJQx8P4MY6jE6JzmcJcNfW', true, 1002);
 INSERT INTO user_account (id, username, password, enabled, check_number) VALUES (3, 'admin', '$2a$10$DOWSD1rzpS60MWTQicYKuOFGG9kW3nqOJQx8P4MY6jE6JzmcJcNfW', true, 1003);
 
+ALTER TABLE user_roles DROP CONSTRAINT IF EXISTS user_roles_role_check;
+ALTER TABLE user_roles ADD CONSTRAINT user_roles_role_check
+    CHECK (role IN ('ROLE_USER', 'ROLE_MANAGER', 'ROLE_DATA_ENTRY', 'ROLE_ADMIN'));
+
 INSERT INTO user_roles (user_id, role) VALUES (1, 'ROLE_USER');
 INSERT INTO user_roles (user_id, role) VALUES (2, 'ROLE_MANAGER');
 INSERT INTO user_roles (user_id, role) VALUES (3, 'ROLE_ADMIN');

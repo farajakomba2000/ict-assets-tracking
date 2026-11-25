@@ -30,7 +30,8 @@ public class UserServiceImpl implements UserService {
     private final EmployeeRepository employeeRepository;
     private final PasswordEncoder passwordEncoder;
 
-    public UserServiceImpl(UserRepository userRepository, EmployeeRepository employeeRepository, PasswordEncoder passwordEncoder) {
+    public UserServiceImpl(UserRepository userRepository, EmployeeRepository employeeRepository,
+                           PasswordEncoder passwordEncoder) {
         this.userRepository = userRepository;
         this.employeeRepository = employeeRepository;
         this.passwordEncoder = passwordEncoder;
@@ -85,9 +86,6 @@ public class UserServiceImpl implements UserService {
             throw new IllegalArgumentException("Check number is required for user creation");
         }
 
-        if (!employeeRepository.existsByCheckNumber(checkNumber)) {
-            throw new IllegalArgumentException("Employee not found for check number: " + checkNumber);
-        }
         if (userRepository.existsByCheckNumber(checkNumber)) {
             throw new IllegalArgumentException("Check number already registered: " + checkNumber);
         }
@@ -109,6 +107,43 @@ public class UserServiceImpl implements UserService {
         user.setPassword(passwordEncoder.encode(request.getPassword()));
         user.setEnabled(true);
         user.setRoles(new HashSet<>(roles));
+        user.setFirstName(request.getFirstName() != null && !request.getFirstName().isBlank()
+                ? request.getFirstName().trim() : null);
+        user.setMiddleName(request.getMiddleName() != null && !request.getMiddleName().isBlank()
+                ? request.getMiddleName().trim() : null);
+        user.setLastName(request.getLastName() != null && !request.getLastName().isBlank()
+                ? request.getLastName().trim() : null);
+        user.setOrganizationCode("TR139");
+        user.setOrganizationName("Tanzania Standard Newspapers (TSN)");
+        user.setDepartmentCode(request.getDepartmentCode());
+        user.setDepartmentName(request.getDepartmentName());
+        String sectionCode = request.getSectionCode();
+        String workstationCode = request.getWorkstationCode();
+
+        if (sectionCode == null || sectionCode.isBlank()) {
+            sectionCode = employeeRepository.findAll().stream()
+                    .filter(employee -> request.getSectionName() != null
+                            && request.getSectionName().equals(employee.getSectionName()))
+                    .map(employee -> employee.getSectionCode())
+                    .filter(code -> code != null && !code.isBlank())
+                    .findFirst()
+                    .orElse(null);
+        }
+
+        if (workstationCode == null || workstationCode.isBlank()) {
+            workstationCode = employeeRepository.findAll().stream()
+                    .filter(employee -> request.getWorkstationName() != null
+                            && request.getWorkstationName().equals(employee.getWorkstationName()))
+                    .map(employee -> employee.getWorkstationCode())
+                    .filter(code -> code != null && !code.isBlank())
+                    .findFirst()
+                    .orElse(null);
+        }
+
+        user.setSectionCode(sectionCode);
+        user.setSectionName(request.getSectionName());
+        user.setWorkstationName(request.getWorkstationName());
+        user.setWorkstationCode(workstationCode);
         return toDto(userRepository.save(user));
     }
 

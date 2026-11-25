@@ -19,6 +19,9 @@ public class AssetDto {
     private Long categoryId;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
+    private String mainCategoryName;
+    private String categoryName;
+    private String ownerDisplayName;
 
     public Long getId() {
         return id;
@@ -147,5 +150,29 @@ public class AssetDto {
 
     public void setUpdatedAt(LocalDateTime updatedAt) {
         this.updatedAt = updatedAt;
+    }
+
+    public String getMainCategoryName() {
+        return mainCategoryName;
+    }
+
+    public void setMainCategoryName(String mainCategoryName) {
+        this.mainCategoryName = mainCategoryName;
+    }
+
+    public String getCategoryName() {
+        return categoryName;
+    }
+
+    public void setCategoryName(String categoryName) {
+        this.categoryName = categoryName;
+    }
+
+    public String getOwnerDisplayName() {
+        return ownerDisplayName;
+    }
+
+    public void setOwnerDisplayName(String ownerDisplayName) {
+        this.ownerDisplayName = ownerDisplayName;
     }
  }

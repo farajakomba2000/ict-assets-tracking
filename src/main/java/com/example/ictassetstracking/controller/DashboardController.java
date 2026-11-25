@@ -28,10 +28,10 @@ public class DashboardController {
         boolean noRole = hasNoRole();
 
         model.addAttribute("showUserManagement", isAdmin());
-        model.addAttribute("showAssetRegistration", isAdmin() || isManager());
-        model.addAttribute("showAssetHandover", isAdmin() || isManager());
-        model.addAttribute("showMyAssignedAssets", isAdmin() || isManager() || isUser || noRole);
-        model.addAttribute("showUserAssetAssignedReport", isAdmin() || isManager());
+        model.addAttribute("showAssetRegistration", isAdmin() || isManager() || isDataEntry());
+        model.addAttribute("showAssetHandover", isAdmin() || isManager() || isDataEntry());
+        model.addAttribute("showMyAssignedAssets", isAdmin() || isManager() || isDataEntry() || isUser || noRole);
+        model.addAttribute("showUserAssetAssignedReport", isAdmin() || isManager() || isDataEntry());
         model.addAttribute("showPersonalAssetCount", isUser || noRole);
         model.addAttribute("showGeneralSummary", !isUser && !noRole);
 
@@ -85,6 +85,10 @@ public class DashboardController {
 
     private boolean isUser() {
         return hasRole("ROLE_USER");
+    }
+
+    private boolean isDataEntry() {
+        return hasRole("ROLE_DATA_ENTRY");
     }
 
     private boolean hasNoRole() {

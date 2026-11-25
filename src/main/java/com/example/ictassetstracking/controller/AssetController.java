@@ -31,26 +31,26 @@ public class AssetController {
 
     
     @GraphQLQuery(name = "assets")
-    @PreAuthorize("hasAnyRole('USER','MANAGER','ADMIN')")
+    @PreAuthorize("hasAnyRole('USER','MANAGER','DATA_ENTRY','ADMIN')")
     public List<AssetDto> assets() {
         return assetService.listAllAssets();
     }
 
     @GraphQLQuery(name = "asset")
-    @PreAuthorize("hasAnyRole('USER','MANAGER','ADMIN')")
+    @PreAuthorize("hasAnyRole('USER','MANAGER','DATA_ENTRY','ADMIN')")
     public AssetDto asset(@GraphQLArgument(name = "id") Long id) {
         return assetService.getAssetById(id);
     }
 
     @GraphQLMutation(name = "createAsset")
-    @PreAuthorize("hasAnyRole('MANAGER','ADMIN')")
+    @PreAuthorize("hasAnyRole('MANAGER','DATA_ENTRY','ADMIN')")
     public AssetDto createAsset(@GraphQLArgument(name = "asset") AssetInput input) {
         AssetDto dto = toDto(input);
         return assetService.createAsset(dto);
     }
 
     @GraphQLMutation(name = "updateAsset")
-    @PreAuthorize("hasAnyRole('MANAGER','ADMIN')")
+    @PreAuthorize("hasAnyRole('MANAGER','DATA_ENTRY','ADMIN')")
     public AssetDto updateAsset(@GraphQLArgument(name = "id") Long id,
                                 @GraphQLArgument(name = "asset") AssetInput input) 
                                 {

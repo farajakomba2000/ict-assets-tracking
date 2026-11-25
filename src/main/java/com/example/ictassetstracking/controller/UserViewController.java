@@ -8,6 +8,7 @@ import java.util.stream.IntStream;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
@@ -86,8 +87,15 @@ public class UserViewController {
 
     @GetMapping({"/users/new", "/users/create"})
     public String createForm(Model model) {
-        model.addAttribute("user", new UserCreateRequest());
+        UserCreateRequest user = new UserCreateRequest();
+        user.setOrganizationCode("TR139");
+        user.setOrganizationName("Tanzania Standard Newspapers (TSN)");
+        model.addAttribute("user", user);
         model.addAttribute("roles", Role.values());
+        model.addAttribute("workstationNames", employeeRepository.findDistinctWorkstationNames());
+        model.addAttribute("departmentNames", employeeRepository.findDistinctDepartmentNames());
+        model.addAttribute("sectionNames", employeeRepository.findDistinctSectionNames());
+        model.addAttribute("employees", employeeRepository.findAll());
         return "user-form";
     }
 
@@ -130,6 +138,10 @@ public class UserViewController {
     public String createUser(@Valid @ModelAttribute("user") UserCreateRequest request, BindingResult result, Model model) {
         if (result.hasErrors()) {
             model.addAttribute("roles", Role.values());
+            model.addAttribute("workstationNames", employeeRepository.findDistinctWorkstationNames());
+            model.addAttribute("departmentNames", employeeRepository.findDistinctDepartmentNames());
+            model.addAttribute("sectionNames", employeeRepository.findDistinctSectionNames());
+            model.addAttribute("employees", employeeRepository.findAll());
             return "user-form";
         }
         try {
@@ -137,6 +149,10 @@ public class UserViewController {
         } catch (IllegalArgumentException ex) {
             model.addAttribute("errorMessage", ex.getMessage());
             model.addAttribute("roles", Role.values());
+            model.addAttribute("workstationNames", employeeRepository.findDistinctWorkstationNames());
+            model.addAttribute("departmentNames", employeeRepository.findDistinctDepartmentNames());
+            model.addAttribute("sectionNames", employeeRepository.findDistinctSectionNames());
+            model.addAttribute("employees", employeeRepository.findAll());
             return "user-form";
         }
         return "redirect:/users";
@@ -160,6 +176,7 @@ public class UserViewController {
         return "redirect:/users";
     }
 
+    @PreAuthorize("hasRole('ADMIN')")
     @PostMapping("/users/{id}/delete")
     public String deleteUser(@PathVariable Long id) {
         userService.deleteUser(id);

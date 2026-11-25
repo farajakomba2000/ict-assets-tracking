@@ -4,6 +4,7 @@ import java.security.Principal;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -86,6 +87,7 @@ public class UserAssetsController {
         return "redirect:/my-assets";
     }
 
+    @PreAuthorize("hasRole('ADMIN')")
     @PostMapping("/my-assets/{id}/delete")
     public String deleteAsset(@PathVariable Long id, Principal principal) {
         // allow delete only if owned by user

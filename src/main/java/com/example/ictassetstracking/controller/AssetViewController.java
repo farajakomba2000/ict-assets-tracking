@@ -3,6 +3,7 @@ package com.example.ictassetstracking.controller;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
@@ -92,6 +93,14 @@ public class AssetViewController {
     @GetMapping("/assets/{id}/edit")
     public String editForm(@PathVariable Long id, Model model) {
         AssetDto dto = assetService.getAssetById(id);
+        if (dto.getOwnerFirstName() != null || dto.getOwnerLastName() != null) {
+            String ownerName = String.join(" ",
+                    dto.getOwnerFirstName() != null ? dto.getOwnerFirstName().trim() : "",
+                    dto.getOwnerLastName() != null ? dto.getOwnerLastName().trim() : "").trim();
+            model.addAttribute("ownerDisplayName", ownerName);
+        } else if (dto.getOwnerUsername() != null) {
+            model.addAttribute("ownerDisplayName", dto.getOwnerUsername());
+        }
         model.addAttribute("asset", dto);
         model.addAttribute("mainCategories", mainCategoryRepository.findAll());
         model.addAttribute("distinctDepartments", userRepository.findDistinctDepartmentNames());
@@ -177,6 +186,7 @@ public class AssetViewController {
         return "redirect:/assets";
     }
 
+    @PreAuthorize("hasRole('ADMIN')")
     @PostMapping("/assets/{id}/delete")
     public String deleteAsset(@PathVariable Long id) {
         assetService.deleteAsset(id);

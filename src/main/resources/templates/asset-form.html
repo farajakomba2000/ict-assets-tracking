@@ -83,7 +83,8 @@
                         
                         <div class="mb-3" id="userSearchGroup">
                             <label for="userSearch" class="form-label">Owner (Search by Name)</label>
-                            <input type="text" class="form-control" id="userSearch" placeholder="Search by first or last name..." autocomplete="off" />
+                            <input type="text" class="form-control" id="userSearch"
+                                   th:value="${ownerDisplayName}" placeholder="Search by first or last name..." autocomplete="off" />
                             <div id="userSearchResults" class="list-group mt-2" style="display: none; position: absolute; z-index: 1000; width: 94%;"></div>
                         </div>
                         
@@ -154,6 +155,8 @@
     const assignmentInstitution = document.getElementById('assignmentInstitution');
     const userSearchGroup = document.getElementById('userSearchGroup');
     const institutionDepartmentGroup = document.getElementById('institutionDepartmentGroup');
+    const mainCategorySelect = document.getElementById('mainCategory');
+    const selectedCategoryId = /*[[${asset.categoryId}]]*/ null;
 
     function updateAssignmentMode() {
         const assignmentType = assignmentInstitution.checked ? 'Institution' : 'Individual';
@@ -166,10 +169,45 @@
         }
     }
 
+    function loadSubcategories(mainCategoryId, selectedId = null) {
+        categorySelect.innerHTML = '<option value="">-- Select a Subcategory --</option>';
+
+        if (!mainCategoryId) {
+            return;
+        }
+
+        fetch(`/api/categories/${mainCategoryId}`)
+            .then(response => {
+                if (!response.ok) throw new Error('Could not load subcategories');
+                return response.json();
+            })
+            .then(categories => {
+                categories.forEach(category => {
+                    const option = document.createElement('option');
+                    option.value = category.id;
+                    option.textContent = category.name;
+                    if (selectedId !== null && String(category.id) === String(selectedId)) {
+                        option.selected = true;
+                    }
+                    categorySelect.appendChild(option);
+                });
+            })
+            .catch(error => console.error('Error loading subcategories:', error));
+    }
+
     assignmentIndividual.addEventListener('change', updateAssignmentMode);
     assignmentInstitution.addEventListener('change', updateAssignmentMode);
 
-    window.addEventListener('load', updateAssignmentMode);
+    mainCategorySelect.addEventListener('change', function() {
+        loadSubcategories(this.value);
+    });
+
+    window.addEventListener('load', function() {
+        updateAssignmentMode();
+        if (mainCategorySelect.value) {
+            loadSubcategories(mainCategorySelect.value, selectedCategoryId);
+        }
+    });
 
     // User search autocomplete
     const userSearch = document.getElementById('userSearch');

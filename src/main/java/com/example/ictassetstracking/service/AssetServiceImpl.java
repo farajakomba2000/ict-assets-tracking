@@ -139,14 +139,53 @@ public class AssetServiceImpl implements AssetService {
         logger.info("Updating asset ID: {}", id);
         Asset asset = assetRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Asset not found: " + id));
-        
-        // Check if serial number and check number combination already exists (only for Individual mode)
-        String assignmentType = dto.getAssignmentType() != null ? dto.getAssignmentType() : "Individual";
+
+        if (dto.getName() == null) dto.setName(asset.getName());
+        if (dto.getSerialNumber() == null) dto.setSerialNumber(asset.getSerialNumber());
+        if (dto.getDescription() == null) dto.setDescription(asset.getDescription());
+        if (dto.getTsnCode() == null) dto.setTsnCode(asset.getTsnCode());
+        if (dto.getMainCategoryId() == null && asset.getMainCategory() != null) {
+            dto.setMainCategoryId(asset.getMainCategory().getId());
+        }
+        if (dto.getCategoryId() == null && asset.getCategory() != null) {
+            dto.setCategoryId(asset.getCategory().getId());
+        }
+
+        if (dto.getAssignmentType() == null) {
+            dto.setAssignmentType(asset.getCheckNumber() != null && asset.getCheckNumber() != 0L
+                    ? "Individual" : "Institution");
+        }
+
+        String assignmentType = dto.getAssignmentType();
+        Long checkNumber = dto.getCheckNumber();
+        String departmentName = dto.getDepartmentName();
+
         if (assignmentType.equalsIgnoreCase("Individual")) {
-            if (!asset.getSerialNumber().equals(dto.getSerialNumber()) || !asset.getCheckNumber().equals(dto.getCheckNumber())) {
-                if (assetRepository.existsBySerialNumberAndCheckNumber(dto.getSerialNumber(), dto.getCheckNumber())) {
-                    throw new IllegalArgumentException("An asset with serial number '" + dto.getSerialNumber() + "' and check number '" + dto.getCheckNumber() + "' already exists");
+            if (checkNumber == null) {
+                checkNumber = asset.getCheckNumber();
+            }
+
+            if (checkNumber != null
+                    && (!asset.getSerialNumber().equals(dto.getSerialNumber())
+                    || !checkNumber.equals(asset.getCheckNumber()))
+                    && assetRepository.existsBySerialNumberAndCheckNumber(dto.getSerialNumber(), checkNumber)) {
+                throw new IllegalArgumentException("An asset with serial number '" + dto.getSerialNumber()
+                        + "' and check number '" + checkNumber + "' already exists");
+            }
+
+            if (checkNumber != null) {
+                com.example.ictassetstracking.entity.UserAccount user =
+                        userRepository.findByCheckNumber(checkNumber).orElse(null);
+                if (user != null) {
+                    if (departmentName == null || departmentName.isBlank()) {
+                        departmentName = user.getDepartmentName();
+                    }
                 }
+            }
+        } else {
+            checkNumber = 0L;
+            if (departmentName == null || departmentName.isBlank()) {
+                departmentName = asset.getDepartmentName();
             }
         }
 
@@ -162,29 +201,6 @@ public class AssetServiceImpl implements AssetService {
         }
         asset.setCategory(category);
 
-        Long checkNumber = dto.getCheckNumber();
-        String departmentName = dto.getDepartmentName();
-        if (dto.getAssignmentType() == null || dto.getAssignmentType().equalsIgnoreCase("Individual")) {
-            if (checkNumber != null) {
-                try {
-                    com.example.ictassetstracking.entity.UserAccount user = userRepository.findByCheckNumber(checkNumber).orElse(null);
-                    if (user != null) {
-                        logger.info("Found user account with check number during update: {}", checkNumber);
-                        if ((departmentName == null || departmentName.isBlank()) && user.getDepartmentName() != null) {
-                            departmentName = user.getDepartmentName();
-                        }
-                    } else {
-                        logger.warn("No user account found with check number during update: {}", checkNumber);
-                    }
-                } catch (Exception e) {
-                    logger.error("Error resolving owner during update: {}", e.getMessage());
-                }
-            }
-        } else {
-            // For Institution mode, use default check number
-            checkNumber = 0L;
-        }
-
         asset.setName(dto.getName());
         asset.setSerialNumber(dto.getSerialNumber());
         asset.setDescription(dto.getDescription());
@@ -195,7 +211,6 @@ public class AssetServiceImpl implements AssetService {
         asset.setUpdatedAt(LocalDateTime.now());
         
         Asset saved = assetRepository.save(asset);
-        logger.info("Asset updated. New owner: null");
         return toDto(saved);
     }
 
@@ -423,6 +438,24 @@ public class AssetServiceImpl implements AssetService {
         }
         asset.setCategory(category);
 
+        // Preserve stored values for missing edit-form fields.
+        if (dto.getName() == null) dto.setName(asset.getName());
+        if (dto.getSerialNumber() == null) dto.setSerialNumber(asset.getSerialNumber());
+        if (dto.getDescription() == null) dto.setDescription(asset.getDescription());
+        if (dto.getTsnCode() == null) dto.setTsnCode(asset.getTsnCode());
+
+        if (dto.getMainCategoryId() == null && asset.getMainCategory() != null) {
+            dto.setMainCategoryId(asset.getMainCategory().getId());
+        }
+        if (dto.getCategoryId() == null && asset.getCategory() != null) {
+            dto.setCategoryId(asset.getCategory().getId());
+        }
+
+        if (dto.getAssignmentType() == null) {
+            dto.setAssignmentType(asset.getCheckNumber() != null && asset.getCheckNumber() != 0L
+                    ? "Individual" : "Institution");
+        }
+
         asset.setName(dto.getName());
         asset.setSerialNumber(dto.getSerialNumber());
         asset.setDescription(dto.getDescription());
@@ -453,6 +486,10 @@ public class AssetServiceImpl implements AssetService {
             dto.setOwnerUsername(asset.getOwner().getUsername());
             dto.setOwnerFirstName(asset.getOwner().getFirstName());
             dto.setOwnerLastName(asset.getOwner().getLastName());
+            String fullName = String.join(" ",
+                    asset.getOwner().getFirstName() != null ? asset.getOwner().getFirstName().trim() : "",
+                    asset.getOwner().getLastName() != null ? asset.getOwner().getLastName().trim() : "").trim();
+            dto.setOwnerDisplayName(fullName.isBlank() ? asset.getOwner().getUsername() : fullName);
         } else if (asset.getCheckNumber() != null) {
             dto.setAssignmentType("Individual");
             com.example.ictassetstracking.entity.UserAccount user = userRepository.findByCheckNumber(asset.getCheckNumber()).orElse(null);
@@ -460,15 +497,23 @@ public class AssetServiceImpl implements AssetService {
                 dto.setOwnerUsername(user.getUsername());
                 dto.setOwnerFirstName(user.getFirstName());
                 dto.setOwnerLastName(user.getLastName());
+                String fullName = String.join(" ",
+                        user.getFirstName() != null ? user.getFirstName().trim() : "",
+                        user.getLastName() != null ? user.getLastName().trim() : "").trim();
+                dto.setOwnerDisplayName(fullName.isBlank() ? user.getUsername() : fullName);
             } else {
                 dto.setOwnerUsername("Unknown User");
+                dto.setOwnerDisplayName("Unknown User");
             }
         } else {
             dto.setAssignmentType("Institution");
             dto.setOwnerUsername("Institution");
+            dto.setOwnerDisplayName("Institution");
         }
         dto.setMainCategoryId(asset.getMainCategory() != null ? asset.getMainCategory().getId() : null);
         dto.setCategoryId(asset.getCategory() != null ? asset.getCategory().getId() : null);
+        dto.setMainCategoryName(asset.getMainCategory() != null ? asset.getMainCategory().getName() : null);
+        dto.setCategoryName(asset.getCategory() != null ? asset.getCategory().getName() : null);
         dto.setIsreleased(asset.isIsreleased());
         dto.setCreatedAt(asset.getCreatedAt());
         dto.setUpdatedAt(asset.getUpdatedAt());

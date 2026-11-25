@@ -32,25 +32,25 @@ public class UserController {
     }
 
     @GetMapping
-    @PreAuthorize("hasAnyRole('MANAGER','ADMIN')")
+    @PreAuthorize("hasAnyRole('MANAGER','DATA_ENTRY','ADMIN')")
     public List<UserDto> listUsers() {
         return userService.listAllUsers();
     }
 
     @GetMapping("/{id}")
-    @PreAuthorize("hasAnyRole('MANAGER','ADMIN')")
+    @PreAuthorize("hasAnyRole('MANAGER','DATA_ENTRY','ADMIN')")
     public UserDto getUser(@PathVariable Long id) {
         return userService.getUserById(id);
     }
 
     @PostMapping
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAnyRole('DATA_ENTRY','ADMIN')")
     public ResponseEntity<UserDto> createUser(@Valid @RequestBody UserCreateRequest request) {
         return ResponseEntity.ok(userService.createUser(request));
     }
 
     @PutMapping("/{id}")
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAnyRole('DATA_ENTRY','ADMIN')")
     public ResponseEntity<UserDto> updateUser(@PathVariable Long id,
                                               @Valid @RequestBody UserUpdateRequest request) {
         return ResponseEntity.ok(userService.updateUser(id, request));
@@ -64,20 +64,20 @@ public class UserController {
     }
 
     @GetMapping("/{id}/roles")
-    @PreAuthorize("hasAnyRole('MANAGER','ADMIN')")
+    @PreAuthorize("hasAnyRole('MANAGER','DATA_ENTRY','ADMIN')")
     public ResponseEntity<UserDto> getRoles(@PathVariable Long id) {
         return ResponseEntity.ok(userService.getUserById(id));
     }
 
     @PutMapping("/{id}/roles")
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAnyRole('DATA_ENTRY','ADMIN')")
     public ResponseEntity<UserDto> setRoles(@PathVariable Long id,
                                             @Valid @RequestBody UserRolesRequest request) {
         return ResponseEntity.ok(userService.setRoles(id, request));
     }
 
     @PostMapping("/{id}/roles")
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAnyRole('DATA_ENTRY','ADMIN')")
     public ResponseEntity<UserDto> addRoles(@PathVariable Long id,
                                             @Valid @RequestBody UserRolesRequest request) {
         return ResponseEntity.ok(userService.addRoles(id, request));
@@ -91,13 +91,13 @@ public class UserController {
     }
 
     @PostMapping("/{id}/activate")
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAnyRole('DATA_ENTRY','ADMIN')")
     public ResponseEntity<UserDto> activateUser(@PathVariable Long id) {
         return ResponseEntity.ok(userService.activateUser(id));
     }
 
     @PostMapping("/{id}/deactivate")
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAnyRole('DATA_ENTRY','ADMIN')")
     public ResponseEntity<UserDto> deactivateUser(@PathVariable Long id) {
         return ResponseEntity.ok(userService.deactivateUser(id));
     }
