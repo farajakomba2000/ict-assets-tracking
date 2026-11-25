@@ -126,6 +126,7 @@ public class AssetServiceImpl implements AssetService {
         asset.setCategory(category);
         asset.setCreatedAt(LocalDateTime.now());
         asset.setTsnCode(dto.getTsnCode());
+        asset.setIsreleased(false);
 
         Asset saved = assetRepository.save(asset);
         logger.info("Asset created with ID: {}, CheckNumber: {}, Owner: {}",
@@ -401,6 +402,7 @@ public class AssetServiceImpl implements AssetService {
         asset.setCategory(category);
         asset.setCreatedAt(LocalDateTime.now());
         asset.setTsnCode(dto.getTsnCode());
+        asset.setIsreleased(false);
 
         Asset saved = assetRepository.save(asset);
         return toDto(saved);

@@ -13,3 +13,7 @@ INSERT INTO user_roles (user_id, role) VALUES (3, 'ROLE_ADMIN');
 INSERT INTO asset (id, name, description, serial_number, owner_id) VALUES (1, 'Laptop', 'Dell Latitude for finance team', 'SN-ICT-001', 1);
 INSERT INTO asset (id, name, description, serial_number, owner_id) VALUES (2, 'Printer', 'Network printer for marketing', 'SN-ICT-002', 2);
 INSERT INTO asset (id, name, description, serial_number, owner_id) VALUES (3, 'Mobile Phone', 'Company phone for admin', 'SN-ICT-003', 3);
+
+UPDATE asset SET isreleased = FALSE WHERE isreleased IS NULL;
+ALTER TABLE asset ALTER COLUMN isreleased SET DEFAULT FALSE;
+ALTER TABLE asset ALTER COLUMN isreleased SET NOT NULL;

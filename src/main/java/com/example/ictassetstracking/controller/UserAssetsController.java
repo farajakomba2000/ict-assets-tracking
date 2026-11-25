@@ -39,6 +39,7 @@ public class UserAssetsController {
     public String myAssets(Model model, Principal principal) {
         String username = principal != null ? principal.getName() : null;
         model.addAttribute("assets", assetService.listAssetsForUser(username));
+        model.addAttribute("canDeleteAssets", isAdmin());
         return "my-assets";
     }
 
@@ -139,5 +140,12 @@ public class UserAssetsController {
             logger.error("Failed to parse check number: {}", checkNumberStr);
             return "redirect:/dashboard";
         }
+    }
+
+    private boolean isAdmin() {
+        org.springframework.security.core.Authentication authentication =
+                org.springframework.security.core.context.SecurityContextHolder.getContext().getAuthentication();
+        return authentication != null && authentication.getAuthorities().stream()
+                .anyMatch(authority -> "ROLE_ADMIN".equals(authority.getAuthority()));
     }
 }

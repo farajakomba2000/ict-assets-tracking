@@ -57,6 +57,7 @@ public class AssetViewController {
         model.addAttribute("pageSize", size);
         model.addAttribute("totalPages", assetsPage.getTotalPages());
         model.addAttribute("totalElements", assetsPage.getTotalElements());
+        model.addAttribute("canDeleteAssets", isAdmin());
         
         AssetDto asset = new AssetDto();
         asset.setAssignmentType("Individual");
@@ -226,5 +227,12 @@ public class AssetViewController {
             // Return empty list on error
         }
         return results;
+    }
+
+    private boolean isAdmin() {
+        org.springframework.security.core.Authentication authentication =
+                org.springframework.security.core.context.SecurityContextHolder.getContext().getAuthentication();
+        return authentication != null && authentication.getAuthorities().stream()
+                .anyMatch(authority -> "ROLE_ADMIN".equals(authority.getAuthority()));
     }
 }

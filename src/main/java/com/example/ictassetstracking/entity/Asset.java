@@ -29,7 +29,7 @@ public class Asset {
     @Column(nullable = false)
     private String serialNumber;
 
-    @Column(name = "isreleased", nullable = true)
+    @Column(name = "isreleased", nullable = false)
     private boolean isreleased;
 
     @ManyToOne(fetch = FetchType.LAZY)
